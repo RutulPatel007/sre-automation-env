@@ -135,3 +135,9 @@ def list_tasks() -> list[dict]:
 @app.get("/health")
 def healthcheck() -> dict[str, str]:
     return {"status": "ok"}
+
+
+def main() -> None:
+    import uvicorn
+
+    uvicorn.run("server.app:app", host="0.0.0.0", port=7860)
