@@ -1,0 +1,58 @@
+name: sre-automation-env
+version: "1.0.0"
+description: >
+  An OpenEnv environment simulating Site Reliability Engineering tasks.
+  Agents must triage alerts, diagnose production incidents, and execute
+  operational runbooks across a simulated microservice topology.
+tags:
+  - openenv
+  - sre
+  - operations
+  - real-world
+tasks:
+  - id: alert_triage
+    name: Alert Triage
+    difficulty: easy
+    max_steps: 10
+    description: "Prioritize and acknowledge firing alerts in correct severity order."
+  - id: incident_diagnosis
+    name: Incident Diagnosis
+    difficulty: medium
+    max_steps: 12
+    description: "Identify root cause service and failure mode from noisy metrics."
+  - id: runbook_execution
+    name: Runbook Execution
+    difficulty: hard
+    max_steps: 15
+    description: "Execute all runbook steps in order with correct parameters."
+observation_space:
+  type: object
+  fields:
+    - name: task_id
+      type: string
+    - name: step
+      type: integer
+    - name: metrics
+      type: object
+    - name: alert_queue
+      type: array
+    - name: logs
+      type: array
+    - name: available_actions
+      type: array
+action_space:
+  type: object
+  fields:
+    - name: action_type
+      type: string
+      enum: [triage, diagnose, escalate, acknowledge, execute_step, resolve]
+    - name: target
+      type: string
+    - name: parameters
+      type: object
+    - name: reasoning
+      type: string
+endpoints:
+  reset: POST /reset
+  step: POST /step
+  state: GET /state

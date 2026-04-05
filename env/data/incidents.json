@@ -1,0 +1,37 @@
+[
+  {
+    "id": "INC-A",
+    "service": "db-service",
+    "failure_mode": "high latency",
+    "description": "db-service query latency is cascading into the checkout path.",
+    "keywords": ["high latency", "latency", "slow query", "database saturation", "db"]
+  },
+  {
+    "id": "INC-B",
+    "service": "auth-service",
+    "failure_mode": "high error rate",
+    "description": "auth-service is rejecting login traffic and causing upstream failures.",
+    "keywords": ["high error rate", "error rate", "login failures", "token", "auth"]
+  },
+  {
+    "id": "INC-C",
+    "service": "payment-service",
+    "failure_mode": "memory leak",
+    "description": "payment-service memory usage keeps rising until worker restarts.",
+    "keywords": ["memory leak", "memory pressure", "oom", "heap growth", "restarts"]
+  },
+  {
+    "id": "INC-D",
+    "service": "api-gateway",
+    "failure_mode": "config drift",
+    "description": "api-gateway is routing traffic to the wrong upstream target.",
+    "keywords": ["config drift", "wrong upstream", "routing", "gateway", "misconfiguration"]
+  },
+  {
+    "id": "INC-E",
+    "service": "user-service",
+    "failure_mode": "deprecated endpoint dependency",
+    "description": "user-service still depends on a deprecated endpoint that now fails.",
+    "keywords": ["deprecated endpoint", "endpoint dependency", "410", "sunset endpoint", "deprecated"]
+  }
+]

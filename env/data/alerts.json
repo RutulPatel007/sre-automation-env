@@ -1,0 +1,182 @@
+[
+  {
+    "id": "ALT-001",
+    "service": "payment-service",
+    "severity": "critical",
+    "message": "Error rate > 5% for 3 consecutive minutes",
+    "is_flapping": false,
+    "is_duplicate": false,
+    "fired_at": "2026-03-01T14:23:00Z"
+  },
+  {
+    "id": "ALT-002",
+    "service": "db-service",
+    "severity": "critical",
+    "message": "p99 latency exceeded 400ms",
+    "is_flapping": false,
+    "is_duplicate": false,
+    "fired_at": "2026-03-01T14:24:00Z"
+  },
+  {
+    "id": "ALT-003",
+    "service": "auth-service",
+    "severity": "warning",
+    "message": "Token verification retries above baseline",
+    "is_flapping": false,
+    "is_duplicate": false,
+    "fired_at": "2026-03-01T14:25:00Z"
+  },
+  {
+    "id": "ALT-004",
+    "service": "api-gateway",
+    "severity": "critical",
+    "message": "5xx rate exceeded 8% on /login",
+    "is_flapping": false,
+    "is_duplicate": false,
+    "fired_at": "2026-03-01T14:26:00Z"
+  },
+  {
+    "id": "ALT-005",
+    "service": "payment-service",
+    "severity": "warning",
+    "message": "Heap usage crossed 85% on checkout worker",
+    "is_flapping": false,
+    "is_duplicate": false,
+    "fired_at": "2026-03-01T14:27:00Z"
+  },
+  {
+    "id": "ALT-006",
+    "service": "payment-service",
+    "severity": "warning",
+    "message": "Heap usage crossed 85% on checkout worker",
+    "is_flapping": false,
+    "is_duplicate": true,
+    "fired_at": "2026-03-01T14:28:00Z"
+  },
+  {
+    "id": "ALT-007",
+    "service": "user-service",
+    "severity": "warning",
+    "message": "Deprecated profile endpoint still receiving traffic",
+    "is_flapping": false,
+    "is_duplicate": false,
+    "fired_at": "2026-03-01T14:29:00Z"
+  },
+  {
+    "id": "ALT-008",
+    "service": "user-service",
+    "severity": "info",
+    "message": "Nightly cache warm completed later than usual",
+    "is_flapping": true,
+    "is_duplicate": false,
+    "fired_at": "2026-03-01T14:30:00Z"
+  },
+  {
+    "id": "ALT-009",
+    "service": "auth-service",
+    "severity": "critical",
+    "message": "JWT validation failures above 20%",
+    "is_flapping": false,
+    "is_duplicate": false,
+    "fired_at": "2026-03-01T14:31:00Z"
+  },
+  {
+    "id": "ALT-010",
+    "service": "db-service",
+    "severity": "warning",
+    "message": "Replica lag above 2 seconds",
+    "is_flapping": true,
+    "is_duplicate": false,
+    "fired_at": "2026-03-01T14:32:00Z"
+  },
+  {
+    "id": "ALT-011",
+    "service": "api-gateway",
+    "severity": "info",
+    "message": "Config reload took longer than 5 seconds",
+    "is_flapping": false,
+    "is_duplicate": false,
+    "fired_at": "2026-03-01T14:33:00Z"
+  },
+  {
+    "id": "ALT-012",
+    "service": "payment-service",
+    "severity": "critical",
+    "message": "OOM restart detected on pod payment-7",
+    "is_flapping": false,
+    "is_duplicate": false,
+    "fired_at": "2026-03-01T14:34:00Z"
+  },
+  {
+    "id": "ALT-013",
+    "service": "payment-service",
+    "severity": "critical",
+    "message": "OOM restart detected on pod payment-7",
+    "is_flapping": false,
+    "is_duplicate": true,
+    "fired_at": "2026-03-01T14:35:00Z"
+  },
+  {
+    "id": "ALT-014",
+    "service": "db-service",
+    "severity": "info",
+    "message": "Autovacuum duration exceeded baseline",
+    "is_flapping": false,
+    "is_duplicate": false,
+    "fired_at": "2026-03-01T14:36:00Z"
+  },
+  {
+    "id": "ALT-015",
+    "service": "api-gateway",
+    "severity": "warning",
+    "message": "Unexpected upstream cluster hash detected",
+    "is_flapping": false,
+    "is_duplicate": false,
+    "fired_at": "2026-03-01T14:37:00Z"
+  },
+  {
+    "id": "ALT-016",
+    "service": "auth-service",
+    "severity": "info",
+    "message": "Background key refresh retried once",
+    "is_flapping": true,
+    "is_duplicate": false,
+    "fired_at": "2026-03-01T14:38:00Z"
+  },
+  {
+    "id": "ALT-017",
+    "service": "user-service",
+    "severity": "critical",
+    "message": "Profile hydration timeout rate exceeded 10%",
+    "is_flapping": false,
+    "is_duplicate": false,
+    "fired_at": "2026-03-01T14:39:00Z"
+  },
+  {
+    "id": "ALT-018",
+    "service": "db-service",
+    "severity": "warning",
+    "message": "Connection pool wait time above 150ms",
+    "is_flapping": false,
+    "is_duplicate": false,
+    "fired_at": "2026-03-01T14:40:00Z"
+  },
+  {
+    "id": "ALT-019",
+    "service": "api-gateway",
+    "severity": "warning",
+    "message": "Rate limiter dropped burst traffic",
+    "is_flapping": false,
+    "is_duplicate": false,
+    "fired_at": "2026-03-01T14:41:00Z"
+  },
+  {
+    "id": "ALT-020",
+    "service": "payment-service",
+    "severity": "info",
+    "message": "Batch settlement lag recovered automatically",
+    "is_flapping": true,
+    "is_duplicate": false,
+    "fired_at": "2026-03-01T14:42:00Z"
+  }
+]

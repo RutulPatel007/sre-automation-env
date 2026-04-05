@@ -1,0 +1,55 @@
+[
+  {
+    "id": "runbook-payment-memory-pressure",
+    "name": "High memory pressure - payment-service",
+    "description": "Mitigate sustained memory pressure on payment-service while preserving checkout capacity.",
+    "steps": [
+      {
+        "name": "check_memory_usage",
+        "parameters": {
+          "service": "payment-service"
+        }
+      },
+      {
+        "name": "identify_top_processes",
+        "parameters": {
+          "service": "payment-service"
+        }
+      },
+      {
+        "name": "capture_heap_dump",
+        "parameters": {
+          "service": "payment-service",
+          "pid": "<from identify_top_processes>"
+        }
+      },
+      {
+        "name": "cordon_instance",
+        "parameters": {
+          "instance_id": "<from identify_top_processes>"
+        }
+      },
+      {
+        "name": "scale_out",
+        "parameters": {
+          "service": "payment-service",
+          "replicas": "+2"
+        }
+      },
+      {
+        "name": "verify_recovery",
+        "parameters": {
+          "service": "payment-service",
+          "wait_seconds": 30
+        }
+      },
+      {
+        "name": "file_incident_report",
+        "parameters": {
+          "severity": "P2",
+          "summary": "<agent-generated>"
+        }
+      }
+    ]
+  }
+]
