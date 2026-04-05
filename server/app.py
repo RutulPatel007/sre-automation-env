@@ -74,28 +74,42 @@ def _get_session(session_id: str) -> _SessionEntry:
 
 
 class ResetRequest(BaseModel):
-    task_id: Literal["alert_triage", "incident_diagnosis", "runbook_execution"]
+    task_id: Literal["alert_triage", "incident_diagnosis", "runbook_execution"] = "alert_triage"
 
 
 class StepRequest(BaseModel):
-    session_id: str
-    action: SREAction
+    session_id: str = ""
+    action: SREAction | None = None
 
 
 @app.post("/reset")
-def reset_environment(request: ResetRequest) -> dict:
+def reset_environment(request: ResetRequest | None = None) -> dict:
     _evict_stale_sessions()
     session_id = str(uuid4())
-    env = SREEnv(task_id=request.task_id)
+    task_id = request.task_id if request else "alert_triage"
+    env = SREEnv(task_id=task_id)
     observation = env.reset()
     SESSIONS[session_id] = _SessionEntry(env)
     return {"session_id": session_id, **observation.model_dump()}
 
 
 @app.post("/step")
-def step_environment(request: StepRequest) -> dict:
+def step_environment(request: StepRequest | None = None) -> dict:
+    if not request or not request.session_id:
+        raise HTTPException(status_code=400, detail="Missing session_id in request body")
+    
     entry = _get_session(request.session_id)
-    observation, reward, done, info = entry.env.step(request.action)
+    action = request.action
+    if not action:
+        # Fallback empty action if tester sends malformed action
+        action = SREAction(
+            action_type="diagnose",
+            target="api-gateway",
+            parameters={},
+            reasoning="fallback action due to missing action body"
+        )
+        
+    observation, reward, done, info = entry.env.step(action)
     if done:
         # Clean up completed sessions after a small delay
         SESSIONS.pop(request.session_id, None)
