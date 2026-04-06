@@ -1,6 +1,6 @@
 """
 STRICT FORMAT - do not deviate from [START]/[STEP]/[END] lines.
-All three tasks must run sequentially.
+All tasks run sequentially.
 """
 
 import json
@@ -16,8 +16,28 @@ MODEL_NAME = os.getenv("MODEL_NAME", "Qwen/Qwen2.5-72B-Instruct")
 HF_TOKEN = os.getenv("HF_TOKEN")
 ENV_URL = os.getenv("ENV_URL", "http://localhost:7860")
 
-TASKS = ["alert_triage", "incident_diagnosis", "runbook_execution"]
-MAX_STEPS = {"alert_triage": 10, "incident_diagnosis": 12, "runbook_execution": 15}
+TASKS = [
+    "alert_triage",
+    "on_call_handoff",
+    "capacity_planning",
+    "incident_diagnosis",
+    "multi_incident_correlation",
+    "auto_remediation",
+    "runbook_execution",
+    "blameless_postmortem",
+    "chaos_engineering",
+]
+MAX_STEPS = {
+    "alert_triage": 10,
+    "on_call_handoff": 6,
+    "capacity_planning": 5,
+    "incident_diagnosis": 12,
+    "multi_incident_correlation": 10,
+    "auto_remediation": 8,
+    "runbook_execution": 15,
+    "blameless_postmortem": 8,
+    "chaos_engineering": 12,
+}
 BENCHMARK = "sre-automation-env"
 
 client = OpenAI(base_url=API_BASE_URL, api_key=HF_TOKEN or "hf_token_not_set")
@@ -39,7 +59,9 @@ valid JSON matching this schema:
 }
 Do NOT wrap your response in markdown code blocks. Output raw JSON only."""
 
-SYSTEM_PROMPT_ALERT_TRIAGE = SYSTEM_PROMPT_BASE + """
+SYSTEM_PROMPT_ALERT_TRIAGE = (
+    SYSTEM_PROMPT_BASE
+    + """
 
 TASK: Alert Triage
 You have a queue of firing alerts. Your goal is to:
@@ -55,8 +77,38 @@ Key rules:
 - Critical alerts are P1, warning alerts are P2, info alerts are P3
 - Acknowledge P1 alerts first, then P2, then P3
 - Do NOT acknowledge flapping or duplicate alerts"""
+)
 
-SYSTEM_PROMPT_INCIDENT = SYSTEM_PROMPT_BASE + """
+SYSTEM_PROMPT_ON_CALL_HANDOFF = (
+    SYSTEM_PROMPT_BASE
+    + """
+
+TASK: On-Call Handoff
+You are the outgoing on-call SRE. Create a concise handoff summary for the incoming engineer.
+Include: active incidents with severity, pending actions, service health highlights, and risks.
+Use action_type="summarize" with target="handoff" and parameters={"summary": "<your summary>"}.
+The summary should be at least 20 words and mention incident IDs, severity levels, and pending actions."""
+)
+
+SYSTEM_PROMPT_CAPACITY_PLANNING = (
+    SYSTEM_PROMPT_BASE
+    + """
+
+TASK: Capacity Planning
+Analyze service capacity metrics and recommend a scaling decision.
+1. First query data: action_type="query_capacity", target=<service or "all">
+2. Then recommend: action_type="recommend_scaling" with parameters:
+   {"recommendation": "scale_out|scale_in|no_change|scale_out_urgent", "target_replicas": <int>}
+
+Consider: CPU/memory utilization, traffic trends, growth rate, and upcoming peak events.
+If CPU p95 > 85% or trend is increasing with a peak event coming -> scale_out or scale_out_urgent.
+If CPU p95 < 50% and trend is decreasing -> scale_in.
+If metrics are stable and within thresholds -> no_change."""
+)
+
+SYSTEM_PROMPT_INCIDENT = (
+    SYSTEM_PROMPT_BASE
+    + """
 
 TASK: Incident Diagnosis
 A production incident is in progress across a microservice topology:
@@ -77,8 +129,48 @@ Failure modes: "high latency", "high error rate", "memory leak", "config drift",
 "deprecated endpoint dependency"
 
 Be efficient: query no more than 3-4 services before submitting your diagnosis."""
+)
 
-SYSTEM_PROMPT_RUNBOOK = SYSTEM_PROMPT_BASE + """
+SYSTEM_PROMPT_MULTI_INCIDENT = (
+    SYSTEM_PROMPT_BASE
+    + """
+
+TASK: Multi-Incident Correlation
+Multiple alerts are firing simultaneously. Determine if they share a common root cause
+or are independent incidents.
+1. Query metrics for each affected service: action_type="diagnose", target=<service>,
+   parameters={"operation": "query_metrics"}
+2. Analyze patterns: are metrics anomalous across all services (shared root cause),
+   or only in specific services (independent)?
+3. Submit correlation: action_type="correlate" with parameters:
+   {"correlation_type": "shared_root_cause|independent_incidents|partial_correlation",
+    "root_cause_service": "<service or none>", "alert_ids": ["ALT-xxx", ...]}
+
+For shared_root_cause: identify the single root cause service affecting all alerts.
+For independent_incidents: set root_cause_service to "none", list all alert ids.
+For partial_correlation: identify which alerts share a root cause and which are independent."""
+)
+
+SYSTEM_PROMPT_AUTO_REMEDIATION = (
+    SYSTEM_PROMPT_BASE
+    + """
+
+TASK: Auto-Remediation with Rollback
+A production incident requires remediation. You must:
+1. Choose a remediation action: action_type="remediate" with parameters={"action": "<action_name>"}
+   Review the remediation_options in the context and pick the one that addresses the root cause.
+2. Verify the result: action_type="verify_recovery" (no parameters needed)
+3. If metrics got WORSE, immediately rollback: action_type="rollback"
+   If metrics improved, you're done.
+4. If partial improvement, consider trying a different action.
+
+The CORRECT action fixes the root cause. Wrong actions may make things worse or only mask symptoms.
+Think carefully about which action addresses the stated root cause."""
+)
+
+SYSTEM_PROMPT_RUNBOOK = (
+    SYSTEM_PROMPT_BASE
+    + """
 
 TASK: Runbook Execution
 You must execute a runbook for "High memory pressure - payment-service" in STRICT order.
@@ -96,11 +188,58 @@ Steps IN ORDER:
 CRITICAL: After step 2, read the tool_outputs carefully to extract the pid and instance_id.
 These MUST be used in steps 3 and 4. The summary in step 7 must mention payment-service
 and describe what was done (e.g., memory pressure, scaled out, recovered)."""
+)
+
+SYSTEM_PROMPT_POSTMORTEM = (
+    SYSTEM_PROMPT_BASE
+    + """
+
+TASK: Blameless Postmortem Generation
+Write a blameless postmortem for a production incident. Required sections:
+summary, timeline, root_cause, impact, action_items.
+
+1. Query incident data first:
+   - action_type="diagnose", target="incident", parameters={"operation": "query_timeline"}
+   - action_type="diagnose", target="incident", parameters={"operation": "query_impact"}
+   - action_type="diagnose", target="incident", parameters={"operation": "query_root_cause"}
+   - action_type="diagnose", target="incident", parameters={"operation": "query_action_items"}
+2. Write each section: action_type="write_postmortem" with parameters:
+   {"section": "<section_name>", "content": "<your content>"}
+
+Each section should have substantive content (15+ words). The root_cause section should
+include keywords from the actual root cause. The action_items section should reference
+the specific action items identified."""
+)
+
+SYSTEM_PROMPT_CHAOS = (
+    SYSTEM_PROMPT_BASE
+    + """
+
+TASK: Chaos Engineering Scenario
+Run a chaos engineering experiment:
+1. Inject the failure: action_type="inject_chaos", target=<target_service>
+2. Observe the impact: action_type="observe_impact", target=<target_service>
+3. Execute mitigation steps IN ORDER: action_type="mitigate_chaos" with
+   parameters={"step": "<step_name>"}
+
+The mitigation steps must be executed in the correct sequential order. Each step
+builds on the previous one. Read the available mitigation_steps in the context
+and execute them one by one in order.
+
+Common patterns: first contain the blast radius (circuit breaker, read-only mode),
+then implement workarounds (fallback, rate limiting), then restore full service."""
+)
 
 TASK_PROMPTS = {
     "alert_triage": SYSTEM_PROMPT_ALERT_TRIAGE,
+    "on_call_handoff": SYSTEM_PROMPT_ON_CALL_HANDOFF,
+    "capacity_planning": SYSTEM_PROMPT_CAPACITY_PLANNING,
     "incident_diagnosis": SYSTEM_PROMPT_INCIDENT,
+    "multi_incident_correlation": SYSTEM_PROMPT_MULTI_INCIDENT,
+    "auto_remediation": SYSTEM_PROMPT_AUTO_REMEDIATION,
     "runbook_execution": SYSTEM_PROMPT_RUNBOOK,
+    "blameless_postmortem": SYSTEM_PROMPT_POSTMORTEM,
+    "chaos_engineering": SYSTEM_PROMPT_CHAOS,
 }
 
 TASK_FALLBACK = {
@@ -110,11 +249,41 @@ TASK_FALLBACK = {
         "parameters": {},
         "reasoning": "fallback: acknowledging first available alert",
     },
+    "on_call_handoff": lambda obs: {
+        "action_type": "summarize",
+        "target": "handoff",
+        "parameters": {
+            "summary": "Active incidents and pending actions need attention."
+        },
+        "reasoning": "fallback: submitting minimal handoff summary",
+    },
+    "capacity_planning": lambda obs: {
+        "action_type": "recommend_scaling",
+        "target": obs.get("context", {}).get("service", "api-gateway"),
+        "parameters": {"recommendation": "no_change", "target_replicas": 3},
+        "reasoning": "fallback: recommending no change",
+    },
     "incident_diagnosis": lambda obs: {
         "action_type": "diagnose",
         "target": "db-service",
         "parameters": {"operation": "query_metrics"},
         "reasoning": "fallback: querying deepest service in dependency chain",
+    },
+    "multi_incident_correlation": lambda obs: {
+        "action_type": "correlate",
+        "target": "all",
+        "parameters": {
+            "correlation_type": "shared_root_cause",
+            "root_cause_service": "db-service",
+            "alert_ids": [],
+        },
+        "reasoning": "fallback: assuming shared root cause",
+    },
+    "auto_remediation": lambda obs: {
+        "action_type": "remediate",
+        "target": obs.get("context", {}).get("service", "api-gateway"),
+        "parameters": {"action": "restart_service"},
+        "reasoning": "fallback: attempting service restart",
     },
     "runbook_execution": lambda obs: {
         "action_type": "execute_step",
@@ -123,6 +292,21 @@ TASK_FALLBACK = {
         ),
         "parameters": {"service": "payment-service"},
         "reasoning": "fallback: attempting next expected runbook step",
+    },
+    "blameless_postmortem": lambda obs: {
+        "action_type": "write_postmortem",
+        "target": "postmortem",
+        "parameters": {
+            "section": "summary",
+            "content": "An incident occurred and was resolved.",
+        },
+        "reasoning": "fallback: writing minimal summary section",
+    },
+    "chaos_engineering": lambda obs: {
+        "action_type": "observe_impact",
+        "target": obs.get("context", {}).get("target_service", "api-gateway"),
+        "parameters": {},
+        "reasoning": "fallback: observing impact",
     },
 }
 
@@ -203,7 +387,9 @@ def run_episode(task_id: str):
                 if action:
                     last_error = "null"
                     # Store the assistant response for conversation history
-                    conversation.append({"role": "assistant", "content": json.dumps(action)})
+                    conversation.append(
+                        {"role": "assistant", "content": json.dumps(action)}
+                    )
                     break
                 else:
                     last_error = "json_extraction_failed"

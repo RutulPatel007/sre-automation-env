@@ -26,6 +26,17 @@ class SREAction(BaseModel):
         "acknowledge",
         "execute_step",
         "resolve",
+        "summarize",
+        "query_capacity",
+        "recommend_scaling",
+        "correlate",
+        "remediate",
+        "rollback",
+        "verify_recovery",
+        "write_postmortem",
+        "inject_chaos",
+        "observe_impact",
+        "mitigate_chaos",
     ]
     target: str
     parameters: dict[str, Any] = Field(default_factory=dict)

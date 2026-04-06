@@ -5,12 +5,54 @@ from env.tasks.task_alert_triage import (
     init_alert_triage_task,
     is_alert_triage_done,
 )
+from env.tasks.task_auto_remediation import (
+    AUTO_REMEDIATION_INFO,
+    apply_auto_remediation_action,
+    build_auto_remediation_observation,
+    init_auto_remediation_task,
+    is_auto_remediation_done,
+)
+from env.tasks.task_blameless_postmortem import (
+    BLAMELESS_POSTMORTEM_INFO,
+    apply_blameless_postmortem_action,
+    build_blameless_postmortem_observation,
+    init_blameless_postmortem_task,
+    is_blameless_postmortem_done,
+)
+from env.tasks.task_capacity_planning import (
+    CAPACITY_PLANNING_INFO,
+    apply_capacity_planning_action,
+    build_capacity_planning_observation,
+    init_capacity_planning_task,
+    is_capacity_planning_done,
+)
+from env.tasks.task_chaos_engineering import (
+    CHAOS_ENGINEERING_INFO,
+    apply_chaos_engineering_action,
+    build_chaos_engineering_observation,
+    init_chaos_engineering_task,
+    is_chaos_engineering_done,
+)
 from env.tasks.task_incident_diagnosis import (
     INCIDENT_DIAGNOSIS_INFO,
     apply_incident_diagnosis_action,
     build_incident_diagnosis_observation,
     init_incident_diagnosis_task,
     is_incident_diagnosis_done,
+)
+from env.tasks.task_multi_incident_correlation import (
+    MULTI_INCIDENT_CORRELATION_INFO,
+    apply_multi_incident_correlation_action,
+    build_multi_incident_correlation_observation,
+    init_multi_incident_correlation_task,
+    is_multi_incident_correlation_done,
+)
+from env.tasks.task_on_call_handoff import (
+    ON_CALL_HANDOFF_INFO,
+    apply_on_call_handoff_action,
+    build_on_call_handoff_observation,
+    init_on_call_handoff_task,
+    is_on_call_handoff_done,
 )
 from env.tasks.task_runbook_execution import (
     RUNBOOK_EXECUTION_INFO,
@@ -19,21 +61,56 @@ from env.tasks.task_runbook_execution import (
     init_runbook_execution_task,
     is_runbook_execution_done,
 )
+from env.tasks.task_registry import ALL_TASKS, EASY_TASKS, HARD_TASKS, MEDIUM_TASKS
 
 __all__ = [
     "ALERT_TRIAGE_INFO",
+    "AUTO_REMEDIATION_INFO",
+    "BLAMELESS_POSTMORTEM_INFO",
+    "CAPACITY_PLANNING_INFO",
+    "CHAOS_ENGINEERING_INFO",
     "INCIDENT_DIAGNOSIS_INFO",
+    "MULTI_INCIDENT_CORRELATION_INFO",
+    "ON_CALL_HANDOFF_INFO",
     "RUNBOOK_EXECUTION_INFO",
     "apply_alert_triage_action",
+    "apply_auto_remediation_action",
+    "apply_blameless_postmortem_action",
+    "apply_capacity_planning_action",
+    "apply_chaos_engineering_action",
     "apply_incident_diagnosis_action",
+    "apply_multi_incident_correlation_action",
+    "apply_on_call_handoff_action",
     "apply_runbook_execution_action",
     "build_alert_triage_observation",
+    "build_auto_remediation_observation",
+    "build_blameless_postmortem_observation",
+    "build_capacity_planning_observation",
+    "build_chaos_engineering_observation",
     "build_incident_diagnosis_observation",
+    "build_multi_incident_correlation_observation",
+    "build_on_call_handoff_observation",
     "build_runbook_execution_observation",
     "init_alert_triage_task",
+    "init_auto_remediation_task",
+    "init_blameless_postmortem_task",
+    "init_capacity_planning_task",
+    "init_chaos_engineering_task",
     "init_incident_diagnosis_task",
+    "init_multi_incident_correlation_task",
+    "init_on_call_handoff_task",
     "init_runbook_execution_task",
     "is_alert_triage_done",
+    "is_auto_remediation_done",
+    "is_blameless_postmortem_done",
+    "is_capacity_planning_done",
+    "is_chaos_engineering_done",
     "is_incident_diagnosis_done",
+    "is_multi_incident_correlation_done",
+    "is_on_call_handoff_done",
     "is_runbook_execution_done",
+    "ALL_TASKS",
+    "EASY_TASKS",
+    "MEDIUM_TASKS",
+    "HARD_TASKS",
 ]

@@ -48,7 +48,8 @@ def _evict_stale_sessions() -> None:
     """Remove expired sessions and enforce max session count."""
     now = time.time()
     expired = [
-        sid for sid, entry in SESSIONS.items()
+        sid
+        for sid, entry in SESSIONS.items()
         if (now - entry.last_active) > SESSION_TTL_SECONDS
     ]
     for sid in expired:
@@ -74,7 +75,17 @@ def _get_session(session_id: str) -> _SessionEntry:
 
 
 class ResetRequest(BaseModel):
-    task_id: Literal["alert_triage", "incident_diagnosis", "runbook_execution"] = "alert_triage"
+    task_id: Literal[
+        "alert_triage",
+        "incident_diagnosis",
+        "runbook_execution",
+        "on_call_handoff",
+        "capacity_planning",
+        "multi_incident_correlation",
+        "auto_remediation",
+        "blameless_postmortem",
+        "chaos_engineering",
+    ] = "alert_triage"
 
 
 class StepRequest(BaseModel):
@@ -96,8 +107,10 @@ def reset_environment(request: ResetRequest | None = None) -> dict:
 @app.post("/step")
 def step_environment(request: StepRequest | None = None) -> dict:
     if not request or not request.session_id:
-        raise HTTPException(status_code=400, detail="Missing session_id in request body")
-    
+        raise HTTPException(
+            status_code=400, detail="Missing session_id in request body"
+        )
+
     entry = _get_session(request.session_id)
     action = request.action
     if not action:
@@ -106,9 +119,9 @@ def step_environment(request: StepRequest | None = None) -> dict:
             action_type="diagnose",
             target="api-gateway",
             parameters={},
-            reasoning="fallback action due to missing action body"
+            reasoning="fallback action due to missing action body",
         )
-        
+
     observation, reward, done, info = entry.env.step(action)
     if done:
         # Clean up completed sessions after a small delay

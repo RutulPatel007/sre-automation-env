@@ -1,30 +1,77 @@
 name: sre-automation-env
-version: "1.0.0"
+version: "2.0.0"
 description: >
   An OpenEnv environment simulating Site Reliability Engineering tasks.
-  Agents must triage alerts, diagnose production incidents, and execute
-  operational runbooks across a simulated microservice topology.
+  Agents must triage alerts, diagnose production incidents, execute
+  operational runbooks, and handle advanced SRE scenarios across a
+  simulated microservice topology.
 tags:
   - openenv
   - sre
   - operations
   - real-world
+difficulty_levels:
+  easy:
+    - alert_triage
+    - on_call_handoff
+    - capacity_planning
+  medium:
+    - incident_diagnosis
+    - multi_incident_correlation
+    - auto_remediation
+  hard:
+    - runbook_execution
+    - blameless_postmortem
+    - chaos_engineering
 tasks:
+  # EASY
   - id: alert_triage
     name: Alert Triage
     difficulty: easy
     max_steps: 10
     description: "Prioritize and acknowledge firing alerts in correct severity order."
+  - id: on_call_handoff
+    name: On-Call Handoff
+    difficulty: easy
+    max_steps: 6
+    description: "Summarize active incidents, pending actions, and service health for the incoming on-call engineer."
+  - id: capacity_planning
+    name: Capacity Planning
+    difficulty: easy
+    max_steps: 5
+    description: "Analyze service metrics trends and recommend scaling decisions."
+  # MEDIUM
   - id: incident_diagnosis
     name: Incident Diagnosis
     difficulty: medium
     max_steps: 12
     description: "Identify root cause service and failure mode from noisy metrics."
+  - id: multi_incident_correlation
+    name: Multi-Incident Correlation
+    difficulty: medium
+    max_steps: 10
+    description: "Identify whether multiple simultaneous alerts share a common root cause or are independent incidents."
+  - id: auto_remediation
+    name: Auto-Remediation with Rollback
+    difficulty: medium
+    max_steps: 8
+    description: "Execute a remediation action, verify if it improved the situation, and rollback if it made things worse."
+  # HARD
   - id: runbook_execution
     name: Runbook Execution
     difficulty: hard
     max_steps: 15
     description: "Execute all runbook steps in order with correct parameters."
+  - id: blameless_postmortem
+    name: Blameless Postmortem Generation
+    difficulty: hard
+    max_steps: 8
+    description: "Synthesize incident timeline, root cause analysis, and actionable follow-ups into a blameless postmortem document."
+  - id: chaos_engineering
+    name: Chaos Engineering Scenario
+    difficulty: hard
+    max_steps: 12
+    description: "Inject a controlled failure, observe system impact, and execute mitigation steps to restore stability."
 observation_space:
   type: object
   fields:
@@ -45,7 +92,7 @@ action_space:
   fields:
     - name: action_type
       type: string
-      enum: [triage, diagnose, escalate, acknowledge, execute_step, resolve]
+      enum: [triage, diagnose, escalate, acknowledge, execute_step, resolve, summarize, query_capacity, recommend_scaling, correlate, remediate, rollback, verify_recovery, write_postmortem, inject_chaos, observe_impact, mitigate_chaos]
     - name: target
       type: string
     - name: parameters
