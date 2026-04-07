@@ -8,7 +8,7 @@ PRIORITY_WEIGHT = {"P1": 3, "P2": 2, "P3": 1}
 
 
 def _clamp(value: float) -> float:
-    return max(0.0, min(1.0, round(value, 4)))
+    return max(0.0001, min(0.9999, round(value, 4)))
 
 
 def _ordering_accuracy(
@@ -50,14 +50,14 @@ def _weighted_jaccard(
     return intersection_weight / union_weight if union_weight else 0.0
 
 
-def grade_alert_triage(
-    state: dict[str, Any], step_count: int, done: bool
-) -> SREReward:
+def grade_alert_triage(state: dict[str, Any], step_count: int, done: bool) -> SREReward:
     actionable_ids = set(state["actionable_ids"])
     ignored_ids = set(state["ignorable_ids"])
     ground_truth = state["ground_truth"]
     acknowledged_order = [
-        alert_id for alert_id in state["acknowledged_order"] if alert_id in actionable_ids
+        alert_id
+        for alert_id in state["acknowledged_order"]
+        if alert_id in actionable_ids
     ]
     acknowledged_ids = set(acknowledged_order)
     weighted_jaccard = _weighted_jaccard(actionable_ids, acknowledged_ids, ground_truth)
@@ -72,11 +72,14 @@ def grade_alert_triage(
     highest_priority_weight = None
     if actionable_ids:
         highest_priority_weight = max(
-            PRIORITY_WEIGHT[ground_truth[alert_id]["priority"]] for alert_id in actionable_ids
+            PRIORITY_WEIGHT[ground_truth[alert_id]["priority"]]
+            for alert_id in actionable_ids
         )
     first_ack_score = 0.0
     if acknowledged_order and highest_priority_weight is not None:
-        first_ack_priority = PRIORITY_WEIGHT[ground_truth[acknowledged_order[0]]["priority"]]
+        first_ack_priority = PRIORITY_WEIGHT[
+            ground_truth[acknowledged_order[0]]["priority"]
+        ]
         if first_ack_priority == highest_priority_weight:
             first_ack_score = 0.2
 

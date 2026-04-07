@@ -4,7 +4,7 @@ from env.models import SREReward
 
 
 def _clamp(value: float) -> float:
-    return max(0.0, min(1.0, round(value, 4)))
+    return max(0.0001, min(0.9999, round(value, 4)))
 
 
 def _report_quality(report: dict | None) -> float:
@@ -19,12 +19,17 @@ def _report_quality(report: dict | None) -> float:
         for keyword in ["scaled", "recovered", "cordon", "heap dump", "memory pressure"]
     )
     coherent_sentence = len(summary.split()) >= 6 and summary.endswith((".", "!", "?"))
-    return 0.1 if has_severity and has_service and has_resolution_language and coherent_sentence else 0.0
+    return (
+        0.1
+        if has_severity
+        and has_service
+        and has_resolution_language
+        and coherent_sentence
+        else 0.0
+    )
 
 
-def grade_runbook_execution(
-    state: dict, step_count: int, done: bool
-) -> SREReward:
+def grade_runbook_execution(state: dict, step_count: int, done: bool) -> SREReward:
     completed_count = len(state["completed_steps"])
     step_score = min(0.7, 0.1 * completed_count)
     pid_bonus = 0.1 if state.get("pid_dependency_ok") else 0.0

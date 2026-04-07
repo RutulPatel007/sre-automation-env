@@ -212,7 +212,7 @@ class SREEnv:
         )
         reward = registry_entry["grade"](self.state_data, self.step_count, done)
         self.cumulative_reward = max(
-            0.0, min(1.0, round(self.cumulative_reward + reward.value, 4))
+            0.0001, min(0.9999, round(self.cumulative_reward + reward.value, 4))
         )
         reward = SREReward(
             value=reward.value,

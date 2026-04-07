@@ -6,7 +6,7 @@ from env.models import SREReward
 
 
 def _clamp(value: float) -> float:
-    return max(0.0, min(1.0, round(value, 4)))
+    return max(0.0001, min(0.9999, round(value, 4)))
 
 
 def grade_capacity_planning(
@@ -16,7 +16,7 @@ def grade_capacity_planning(
     rec = state.get("recommendation")
     if not rec:
         return SREReward(
-            value=0.0,
+            value=0.0001,
             breakdown={"error": "No scaling recommendation submitted"},
             done=done,
             info={},

@@ -6,7 +6,7 @@ from env.models import SREReward
 
 
 def _clamp(value: float) -> float:
-    return max(0.0, min(1.0, round(value, 4)))
+    return max(0.0001, min(0.9999, round(value, 4)))
 
 
 def grade_chaos_engineering(
@@ -18,7 +18,7 @@ def grade_chaos_engineering(
 
     if not state.get("chaos_injected"):
         return SREReward(
-            value=0.0, breakdown={"error": "No chaos injected"}, done=done, info={}
+            value=0.0001, breakdown={"error": "No chaos injected"}, done=done, info={}
         )
 
     injection_score = 0.1

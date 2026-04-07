@@ -6,7 +6,7 @@ from env.models import SREReward
 
 
 def _clamp(value: float) -> float:
-    return max(0.0, min(1.0, round(value, 4)))
+    return max(0.0001, min(0.9999, round(value, 4)))
 
 
 def grade_auto_remediation(
@@ -18,7 +18,7 @@ def grade_auto_remediation(
 
     if not attempted:
         return SREReward(
-            value=0.0,
+            value=0.0001,
             breakdown={"error": "No remediation attempted"},
             done=done,
             info={},

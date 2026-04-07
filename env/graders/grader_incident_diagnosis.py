@@ -16,7 +16,7 @@ UPSTREAM_MAP = {
 
 
 def _clamp(value: float) -> float:
-    return max(0.0, min(1.0, round(value, 4)))
+    return max(0.0001, min(0.9999, round(value, 4)))
 
 
 def _normalize(text: str) -> str:

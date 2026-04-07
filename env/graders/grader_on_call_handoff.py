@@ -6,7 +6,7 @@ from env.models import SREReward
 
 
 def _clamp(value: float) -> float:
-    return max(0.0, min(1.0, round(value, 4)))
+    return max(0.0001, min(0.9999, round(value, 4)))
 
 
 def grade_on_call_handoff(
@@ -15,7 +15,7 @@ def grade_on_call_handoff(
     summary = state.get("handoff_summary")
     if not summary:
         return SREReward(
-            value=0.0,
+            value=0.0001,
             breakdown={"error": "No handoff summary submitted"},
             done=done,
             info={},
