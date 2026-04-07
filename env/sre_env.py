@@ -5,6 +5,7 @@ import random
 from pathlib import Path
 from typing import Any
 
+from env.graders.scoring import clamp_task_score
 from env.graders import (
     grade_alert_triage,
     grade_auto_remediation,
@@ -211,11 +212,9 @@ class SREEnv:
             registry_entry["metadata"]["max_steps"],
         )
         reward = registry_entry["grade"](self.state_data, self.step_count, done)
-        self.cumulative_reward = max(
-            0.0001, min(0.9999, round(self.cumulative_reward + reward.value, 4))
-        )
+        self.cumulative_reward = clamp_task_score(self.cumulative_reward + reward.value)
         reward = SREReward(
-            value=reward.value,
+            value=clamp_task_score(reward.value),
             breakdown=reward.breakdown,
             done=done,
             info={

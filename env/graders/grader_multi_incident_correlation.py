@@ -2,11 +2,11 @@ from __future__ import annotations
 
 from typing import Any
 
+from env.graders.scoring import clamp_task_score
 from env.models import SREReward
 
 
-def _clamp(value: float) -> float:
-    return max(0.0001, min(0.9999, round(value, 4)))
+_clamp = clamp_task_score
 
 
 def grade_multi_incident_correlation(
