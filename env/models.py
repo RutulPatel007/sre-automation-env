@@ -44,7 +44,7 @@ class SREAction(BaseModel):
 
 
 class SREReward(BaseModel):
-    value: float = Field(ge=0.0, le=1.0)
+    value: float = Field(gt=0.0, lt=1.0)
     breakdown: dict[str, Any] = Field(default_factory=dict)
     done: bool
     info: dict[str, Any] = Field(default_factory=dict)
