@@ -10,6 +10,7 @@ import time
 
 import httpx
 from openai import OpenAI
+from env.graders.scoring import clamp_task_score
 
 API_BASE_URL = os.getenv("API_BASE_URL", "https://router.huggingface.co/v1")
 MODEL_NAME = os.getenv("MODEL_NAME", "Qwen/Qwen2.5-72B-Instruct")
@@ -39,6 +40,7 @@ MAX_STEPS = {
     "chaos_engineering": 12,
 }
 BENCHMARK = "sre-automation-env"
+SCORE_FORMAT_PRECISION = 4
 
 client = OpenAI(base_url=API_BASE_URL, api_key=HF_TOKEN or "hf_token_not_set")
 
@@ -351,6 +353,18 @@ def _extract_json(raw: str) -> dict | None:
 MAX_RETRIES = 2
 
 
+def _normalize_task_score(value) -> float:
+    try:
+        numeric_value = float(value)
+    except (TypeError, ValueError):
+        numeric_value = 0.0
+    return clamp_task_score(numeric_value)
+
+
+def _format_task_score(value) -> str:
+    return f"{_normalize_task_score(value):.{SCORE_FORMAT_PRECISION}f}"
+
+
 def run_episode(task_id: str):
     resp = httpx.post(f"{ENV_URL}/reset", json={"task_id": task_id}, timeout=30)
     resp.raise_for_status()
@@ -362,7 +376,7 @@ def run_episode(task_id: str):
     rewards = []
     done = False
     step = 0
-    score = 0.0
+    score = _normalize_task_score(0.0)
     last_error = "null"
     system_prompt = TASK_PROMPTS[task_id]
     conversation = [{"role": "system", "content": system_prompt}]
@@ -421,24 +435,27 @@ def run_episode(task_id: str):
         except Exception as e:
             last_error = f"env_error:{type(e).__name__}"
             step += 1
-            rewards.append(0.0)
+            error_reward = _normalize_task_score(0.0)
+            rewards.append(error_reward)
             print(
                 f"[STEP] step={step} action={action.get('action_type', '?')}({action.get('target', '?')}) "
-                f"reward=0.00 done=false error={last_error}"
+                f"reward={_format_task_score(error_reward)} done=false error={last_error}"
             )
             continue
 
         obs = result["observation"]
-        reward_val = result["reward"]["value"]
+        reward_val = _normalize_task_score(result["reward"]["value"])
         done = result["done"]
-        score = result.get("info", {}).get("cumulative_score", reward_val)
+        score = _normalize_task_score(
+            result.get("info", {}).get("cumulative_score", reward_val)
+        )
 
         rewards.append(reward_val)
         step += 1
 
         print(
             f"[STEP] step={step} action={action['action_type']}({action['target']}) "
-            f"reward={reward_val:.2f} done={str(done).lower()} error={last_error}"
+            f"reward={_format_task_score(reward_val)} done={str(done).lower()} error={last_error}"
         )
 
         # Trim conversation history if too long (keep system + last 6 exchanges)
@@ -446,10 +463,10 @@ def run_episode(task_id: str):
             conversation = [conversation[0]] + conversation[-12:]
 
     success = score >= 0.5
-    rewards_str = ",".join(f"{reward:.2f}" for reward in rewards)
+    rewards_str = ",".join(_format_task_score(reward) for reward in rewards)
     print(
         f"[END] success={str(success).lower()} steps={step} "
-        f"score={score:.2f} rewards={rewards_str}"
+        f"score={_format_task_score(score)} rewards={rewards_str}"
     )
     return score
 
